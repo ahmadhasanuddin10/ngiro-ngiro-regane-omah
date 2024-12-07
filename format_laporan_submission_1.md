@@ -221,69 +221,7 @@ _Laporan ini telah disusun untuk memenuhi standar dokumentasi proyek machine lea
 
 ___Semoga Tugas Di terima dengan Baik, mohon bimbingannya__
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-Berikut adalah laporan yang lebih terstruktur dan lengkap sesuai dengan permintaan, dengan menggunakan penulisan markdown dan heading yang sesuai. 
-
----
-
-# **House Price Prediction**
-Model ini bertujuan untuk memprediksi harga rumah berdasarkan fitur-fitur tertentu menggunakan beberapa algoritma Machine Learning. Laporan ini meliputi proses data preparation, modeling, evaluasi, dan interpretasi hasil.
-
----
-
-## **1. Data Preparation**
-
-Tahapan ini mencakup langkah-langkah untuk membersihkan dan mempersiapkan data agar siap digunakan dalam pemodelan. 
-
-### **1.1 Data Understanding**
-Dataset yang digunakan berisi kolom-kolom seperti:
-- `area`: Luas rumah.
-- `price`: Harga rumah.
-- Fitur tambahan seperti `mainroad`, `guestroom`, dan lainnya.
-
-
-
----
-
-## **2. Modeling**
-
-Beberapa model digunakan untuk prediksi harga rumah. Setiap model diuji dengan tuning parameter untuk mendapatkan performa terbaik.
-
-### **2.1 Penjelasan Model**
-1. **Linear Regression**  
-   Model ini menggunakan persamaan linier untuk memprediksi variabel target. Kelebihannya adalah interpretabilitas yang tinggi.
-   
-2. **Ridge Regression**  
-   Ridge menambahkan penalti L2 pada koefisien regresi untuk mengurangi multikolinearitas.
-
-3. **Lasso Regression**  
-   Lasso menambahkan penalti L1, yang dapat menghasilkan model lebih sederhana dengan menghilangkan beberapa fitur.
-
-4. **Random Forest**  
-   Ensemble method yang menggabungkan banyak decision tree untuk meningkatkan akurasi.
-
-5. **Decision Tree**  
-   Model ini membuat pohon keputusan berdasarkan aturan-aturan yang memisahkan data.
-
-6. **Support Vector Regression (SVR)**  
-   SVR menggunakan hyperplane untuk memprediksi nilai target dalam margin toleransi tertentu.
-
-7. **XGBoost**  
-   Algoritma boosting berbasis gradient yang sangat efisien untuk data tabular.
-
-### **2.2 Tuning Parameter**
+### **Tuning Parameter**
 Hyperparameter terbaik diperoleh melalui GridSearchCV:
 ```python
 from sklearn.model_selection import GridSearchCV
@@ -305,44 +243,18 @@ for name, model in models.items():
     best_models[name] = grid.best_estimator_
 ```
 
----
 
-## **3. Evaluation**
 
-Model dievaluasi menggunakan metrik:
-- **R²**: Mengukur seberapa baik model menjelaskan variansi target.
-- **MAPE**: Persentase rata-rata kesalahan prediksi.
 
-### **Hasil Evaluasi**
-```python
-from sklearn.metrics import r2_score, mean_absolute_percentage_error
 
-results = {}
-for name, model in best_models.items():
-    y_pred = model.predict(X_test)
-    r2 = r2_score(y_test, y_pred)
-    mape = mean_absolute_percentage_error(y_test, y_pred) * 100
-    results[name] = {'R²': r2, 'MAPE': mape}
 
-results_df = pd.DataFrame(results).T
-print(results_df)
-```
 
-### **Feature Importance**
-Untuk model Random Forest dan XGBoost:
-```python
-feature_importances = pd.Series(best_models['XGBoost'].feature_importances_, index=X.columns)
-feature_importances.nlargest(10).plot(kind='barh')
-plt.title("Feature Importances - XGBoost")
-plt.show()
-```
 
----
 
-## **4. Kesimpulan**
-- **XGBoost** adalah model terbaik dengan nilai R² tertinggi (0.9692) dan MAPE terendah (4.39%).
-- **Random Forest** menjadi alternatif dengan performa hampir setara.
-- Model regresi linear tidak cocok untuk dataset ini karena nilai MAPE yang tinggi.
 
-**Rekomendasi**: 
-Gunakan XGBoost untuk prediksi harga rumah. Optimalkan proses preprocessing untuk meningkatkan akurasi lebih lanjut.
+
+
+
+
+
+-

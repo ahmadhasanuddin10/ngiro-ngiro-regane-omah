@@ -139,7 +139,16 @@ df['price_per_sqft'] = df['price'] / df['area']
 ```
 
 ---
+#### **1. Mapping Kolom 'hotwaterheating'**
+Kolom `'hotwaterheating'` yang berisi nilai kategorikal (`'yes'` atau `'no'`) diubah menjadi nilai numerik menggunakan *dictionary mapping*:
+- `'yes'` → 1  
+- `'no'` → 0  
 
+Kode:
+```python
+hotwater_mapping = {'yes': 1, 'no': 0}
+X['hotwaterheating'] = X['hotwaterheating'].map(hotwater_mapping)
+```
 ### **Penanganan Missing Values**
 Setelah encoding dan transformasi data, kolom yang masih memiliki nilai *missing* (`NaN`) diperiksa.  
 Nilai *missing* diisi dengan **0** untuk mencegah error selama pemrosesan lebih lanjut.
@@ -274,5 +283,11 @@ _Laporan ini telah disusun untuk memenuhi standar dokumentasi proyek machine lea
 
 
 ___Semoga Tugas Di terima dengan Baik, mohon bimbingannya__
+
+
+
+
+
+
 
 

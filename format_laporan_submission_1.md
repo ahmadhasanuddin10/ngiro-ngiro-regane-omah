@@ -87,9 +87,6 @@ Pada tahap ini, dilakukan pengolahan fitur agar siap digunakan dalam model. Lang
 3. **Penanganan Outlier**  
    Menggunakan metode **IQR** (Interquartile Range) untuk menghapus data yang memiliki nilai terlalu ekstrem, seperti harga atau luas area yang terlalu jauh dari rentang normal.  
 
-### **Vectorizer**
-Tidak ada fitur berbasis teks pada dataset ini, sehingga tahap ini tidak diperlukan.  
-
 ### **Split Data**
 Dataset dibagi menjadi **training** dan **testing** set:  
 - **Training Set**: 80% dari data, digunakan untuk melatih model.  

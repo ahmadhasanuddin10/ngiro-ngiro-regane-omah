@@ -78,22 +78,41 @@ Dataset yang digunakan berisi lebih dari 500 baris data mengenai properti, menca
 
 # **Data Preparation**
 
-### **Feature Engineering**
-Feature engineering bertujuan untuk membuat fitur baru yang dapat meningkatkan performa model. Langkah-langkahnya adalah:
-- Menambahkan kolom `price_per_sqft`, yaitu rasio harga terhadap luas rumah:
-  ```python
-  df['price_per_sqft'] = df['price'] / df['area']
-  ```
-- Encoding variabel kategorikal menggunakan `LabelEncoder`:
-  ```python
-  categorical_cols = ['mainroad', 'guestroom', 'basement', 'airconditioning', 'prefarea', 'furnishingstatus']
-  le = LabelEncoder()
-  for col in categorical_cols:
-      df[col] = le.fit_transform(df[col])
-  ```
+---
 
-### **Penanganan Outlier**
-Outlier dihapus menggunakan metode IQR (Interquartile Range). Langkahnya adalah:
+### **Label Encoding untuk Variabel Kategorikal**
+Variabel kategorikal yang berupa nilai non-numerik (misalnya `'yes'`/`'no'` atau kategori lainnya) dikonversi menjadi nilai numerik dengan menggunakan `LabelEncoder`. Variabel-variabel yang diubah meliputi:  
+`['mainroad', 'guestroom', 'basement', 'hotwaterheating', 'airconditioning', 'prefarea', 'furnishingstatus']`.
+
+Contoh hasil:  
+- `'yes'` → 1  
+- `'no'` → 0  
+
+Kode:  
+```python
+encoder = LabelEncoder()
+for col in label_cols:
+    df[col] = encoder.fit_transform(df[col])
+```
+
+---
+
+### **Normalisasi Kolom Numerik**
+Kolom numerik `'area'` dan `'price'` dinormalisasi menggunakan `MinMaxScaler` agar nilai-nilai berada dalam rentang [0, 1]. Ini penting untuk menyamakan skala data dan mencegah bias pada algoritma yang sensitif terhadap skala.
+
+Kode:  
+```python
+scaler = MinMaxScaler()
+df[num_cols] = scaler.fit_transform(df[num_cols])
+```
+
+---
+
+### **Penanganan Outliers dengan IQR**
+Untuk kolom `'price'`, `'area'`, dan `'price_per_sqft'`, data yang merupakan *outliers* (berada di luar rentang [Q1 - 1.5 * IQR, Q3 + 1.5 * IQR]) dihapus.  
+Metode IQR (Interquartile Range) membantu mengurangi pengaruh data ekstrem.
+
+Kode:  
 ```python
 def remove_outliers(df, cols):
     for col in cols:
@@ -109,25 +128,58 @@ outlier_cols = ['price', 'area', 'price_per_sqft']
 df = remove_outliers(df, outlier_cols)
 ```
 
-### **Normalisasi Data**
-Data numerik dinormalisasi menggunakan `StandardScaler` agar berada dalam skala yang sama:
-```python
-from sklearn.preprocessing import StandardScaler
-scaler = StandardScaler()
-num_cols = ['area', 'price', 'price_per_sqft']
-df[num_cols] = scaler.fit_transform(df[num_cols])
-```
+---
 
-### **Split Data**
-Data dipecah menjadi set pelatihan (80%) dan pengujian (20%) menggunakan `train_test_split`:
+### **Penambahan Fitur Baru**
+Fitur `'price_per_sqft'` ditambahkan untuk memberikan informasi harga per satuan luas area (`price / area`). Fitur ini berguna untuk analisis lebih lanjut.
+
+Kode:  
 ```python
-from sklearn.model_selection import train_test_split
-X = df.drop(columns=['price'])
-y = df['price']
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+df['price_per_sqft'] = df['price'] / df['area']
 ```
 
 ---
+
+### **Penanganan Missing Values**
+Setelah encoding dan transformasi data, kolom yang masih memiliki nilai *missing* (`NaN`) diperiksa.  
+Nilai *missing* diisi dengan **0** untuk mencegah error selama pemrosesan lebih lanjut.
+
+Kode:  
+```python
+X.fillna(0, inplace=True)
+```
+
+---
+
+### **Standardisasi Data**
+Semua kolom dalam dataset dinormalisasi menggunakan `StandardScaler` sehingga memiliki mean = 0 dan standar deviasi = 1.  
+Langkah ini memastikan setiap fitur memiliki kontribusi yang seimbang selama pelatihan model.
+
+Kode:  
+```python
+scaler = StandardScaler()
+X_scaled = pd.DataFrame(scaler.fit_transform(X), columns=X.columns)
+```
+
+---
+
+### **Pembagian Data (Train-Test Split)**
+Dataset dibagi menjadi data *training* (80%) dan *testing* (20%) menggunakan `train_test_split`.  
+Parameter `random_state=42` memastikan pembagian yang konsisten saat dijalankan ulang.
+
+Kode:  
+```python
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
+```
+
+---
+Proses *preprocessing* ini mencakup:
+1. **Encoding** variabel kategorikal.
+2. **Normalisasi** dan **standardisasi** fitur numerik.
+3. Penanganan **outliers** dan **missing values**.
+4. Penambahan fitur baru untuk analisis (*feature engineering*).
+5. Pembagian data untuk pelatihan dan pengujian model.
 
 # **Modeling**
 

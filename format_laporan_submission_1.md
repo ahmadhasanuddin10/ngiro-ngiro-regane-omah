@@ -79,23 +79,53 @@ Dataset yang digunakan berisi lebih dari 500 baris data mengenai properti, menca
 # **Data Preparation**
 
 ### **Feature Engineering**
-Pada tahap ini, dilakukan pengolahan fitur agar siap digunakan dalam model. Langkah-langkah yang dilakukan:  
-1. **Encoding Fitur Kategorikal**  
-   Fitur seperti `mainroad`, `guestroom`, `basement`, `airconditioning`, `prefarea`, dan `furnishingstatus` diubah menjadi nilai numerik menggunakan **LabelEncoder**.  
-2. **Penambahan Fitur Baru**  
-   Ditambahkan fitur `price_per_sqft` (harga per meter persegi) untuk meningkatkan kemampuan model dalam memahami hubungan harga dan luas properti.  
-3. **Penanganan Outlier**  
-   Menggunakan metode **IQR** (Interquartile Range) untuk menghapus data yang memiliki nilai terlalu ekstrem, seperti harga atau luas area yang terlalu jauh dari rentang normal.  
+Feature engineering bertujuan untuk membuat fitur baru yang dapat meningkatkan performa model. Langkah-langkahnya adalah:
+- Menambahkan kolom `price_per_sqft`, yaitu rasio harga terhadap luas rumah:
+  ```python
+  df['price_per_sqft'] = df['price'] / df['area']
+  ```
+- Encoding variabel kategorikal menggunakan `LabelEncoder`:
+  ```python
+  categorical_cols = ['mainroad', 'guestroom', 'basement', 'airconditioning', 'prefarea', 'furnishingstatus']
+  le = LabelEncoder()
+  for col in categorical_cols:
+      df[col] = le.fit_transform(df[col])
+  ```
+
+### **Penanganan Outlier**
+Outlier dihapus menggunakan metode IQR (Interquartile Range). Langkahnya adalah:
+```python
+def remove_outliers(df, cols):
+    for col in cols:
+        Q1 = df[col].quantile(0.25)
+        Q3 = df[col].quantile(0.75)
+        IQR = Q3 - Q1
+        lower_bound = Q1 - 1.5 * IQR
+        upper_bound = Q3 + 1.5 * IQR
+        df = df[(df[col] >= lower_bound) & (df[col] <= upper_bound)]
+    return df
+
+outlier_cols = ['price', 'area', 'price_per_sqft']
+df = remove_outliers(df, outlier_cols)
+```
+
+### **Normalisasi Data**
+Data numerik dinormalisasi menggunakan `StandardScaler` agar berada dalam skala yang sama:
+```python
+from sklearn.preprocessing import StandardScaler
+scaler = StandardScaler()
+num_cols = ['area', 'price', 'price_per_sqft']
+df[num_cols] = scaler.fit_transform(df[num_cols])
+```
 
 ### **Split Data**
-Dataset dibagi menjadi **training** dan **testing** set:  
-- **Training Set**: 80% dari data, digunakan untuk melatih model.  
-- **Testing Set**: 20% dari data, digunakan untuk evaluasi model.  
-- Proses pembagian dilakukan menggunakan fungsi `train_test_split` dengan `random_state=42` untuk memastikan hasil yang konsisten:
-   ```python
-   from sklearn.model_selection import train_test_split
-   X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
-   ```
+Data dipecah menjadi set pelatihan (80%) dan pengujian (20%) menggunakan `train_test_split`:
+```python
+from sklearn.model_selection import train_test_split
+X = df.drop(columns=['price'])
+y = df['price']
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+```
 
 ---
 
@@ -223,54 +253,7 @@ Dataset yang digunakan berisi kolom-kolom seperti:
 - `price`: Harga rumah.
 - Fitur tambahan seperti `mainroad`, `guestroom`, dan lainnya.
 
-### **1.2 Feature Engineering**
-Feature engineering bertujuan untuk membuat fitur baru yang dapat meningkatkan performa model. Langkah-langkahnya adalah:
-- Menambahkan kolom `price_per_sqft`, yaitu rasio harga terhadap luas rumah:
-  ```python
-  df['price_per_sqft'] = df['price'] / df['area']
-  ```
-- Encoding variabel kategorikal menggunakan `LabelEncoder`:
-  ```python
-  categorical_cols = ['mainroad', 'guestroom', 'basement', 'airconditioning', 'prefarea', 'furnishingstatus']
-  le = LabelEncoder()
-  for col in categorical_cols:
-      df[col] = le.fit_transform(df[col])
-  ```
 
-### **1.3 Penanganan Outlier**
-Outlier dihapus menggunakan metode IQR (Interquartile Range). Langkahnya adalah:
-```python
-def remove_outliers(df, cols):
-    for col in cols:
-        Q1 = df[col].quantile(0.25)
-        Q3 = df[col].quantile(0.75)
-        IQR = Q3 - Q1
-        lower_bound = Q1 - 1.5 * IQR
-        upper_bound = Q3 + 1.5 * IQR
-        df = df[(df[col] >= lower_bound) & (df[col] <= upper_bound)]
-    return df
-
-outlier_cols = ['price', 'area', 'price_per_sqft']
-df = remove_outliers(df, outlier_cols)
-```
-
-### **1.4 Normalisasi Data**
-Data numerik dinormalisasi menggunakan `StandardScaler` agar berada dalam skala yang sama:
-```python
-from sklearn.preprocessing import StandardScaler
-scaler = StandardScaler()
-num_cols = ['area', 'price', 'price_per_sqft']
-df[num_cols] = scaler.fit_transform(df[num_cols])
-```
-
-### **1.5 Split Data**
-Data dipecah menjadi set pelatihan (80%) dan pengujian (20%) menggunakan `train_test_split`:
-```python
-from sklearn.model_selection import train_test_split
-X = df.drop(columns=['price'])
-y = df['price']
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-```
 
 ---
 

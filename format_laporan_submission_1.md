@@ -193,3 +193,173 @@ ___Semoga Tugas Di terima dengan Baik, mohon bimbingannya__
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+Berikut adalah laporan yang lebih terstruktur dan lengkap sesuai dengan permintaan, dengan menggunakan penulisan markdown dan heading yang sesuai. 
+
+---
+
+# **House Price Prediction**
+Model ini bertujuan untuk memprediksi harga rumah berdasarkan fitur-fitur tertentu menggunakan beberapa algoritma Machine Learning. Laporan ini meliputi proses data preparation, modeling, evaluasi, dan interpretasi hasil.
+
+---
+
+## **1. Data Preparation**
+
+Tahapan ini mencakup langkah-langkah untuk membersihkan dan mempersiapkan data agar siap digunakan dalam pemodelan. 
+
+### **1.1 Data Understanding**
+Dataset yang digunakan berisi kolom-kolom seperti:
+- `area`: Luas rumah.
+- `price`: Harga rumah.
+- Fitur tambahan seperti `mainroad`, `guestroom`, dan lainnya.
+
+### **1.2 Feature Engineering**
+Feature engineering bertujuan untuk membuat fitur baru yang dapat meningkatkan performa model. Langkah-langkahnya adalah:
+- Menambahkan kolom `price_per_sqft`, yaitu rasio harga terhadap luas rumah:
+  ```python
+  df['price_per_sqft'] = df['price'] / df['area']
+  ```
+- Encoding variabel kategorikal menggunakan `LabelEncoder`:
+  ```python
+  categorical_cols = ['mainroad', 'guestroom', 'basement', 'airconditioning', 'prefarea', 'furnishingstatus']
+  le = LabelEncoder()
+  for col in categorical_cols:
+      df[col] = le.fit_transform(df[col])
+  ```
+
+### **1.3 Penanganan Outlier**
+Outlier dihapus menggunakan metode IQR (Interquartile Range). Langkahnya adalah:
+```python
+def remove_outliers(df, cols):
+    for col in cols:
+        Q1 = df[col].quantile(0.25)
+        Q3 = df[col].quantile(0.75)
+        IQR = Q3 - Q1
+        lower_bound = Q1 - 1.5 * IQR
+        upper_bound = Q3 + 1.5 * IQR
+        df = df[(df[col] >= lower_bound) & (df[col] <= upper_bound)]
+    return df
+
+outlier_cols = ['price', 'area', 'price_per_sqft']
+df = remove_outliers(df, outlier_cols)
+```
+
+### **1.4 Normalisasi Data**
+Data numerik dinormalisasi menggunakan `StandardScaler` agar berada dalam skala yang sama:
+```python
+from sklearn.preprocessing import StandardScaler
+scaler = StandardScaler()
+num_cols = ['area', 'price', 'price_per_sqft']
+df[num_cols] = scaler.fit_transform(df[num_cols])
+```
+
+### **1.5 Split Data**
+Data dipecah menjadi set pelatihan (80%) dan pengujian (20%) menggunakan `train_test_split`:
+```python
+from sklearn.model_selection import train_test_split
+X = df.drop(columns=['price'])
+y = df['price']
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+```
+
+---
+
+## **2. Modeling**
+
+Beberapa model digunakan untuk prediksi harga rumah. Setiap model diuji dengan tuning parameter untuk mendapatkan performa terbaik.
+
+### **2.1 Penjelasan Model**
+1. **Linear Regression**  
+   Model ini menggunakan persamaan linier untuk memprediksi variabel target. Kelebihannya adalah interpretabilitas yang tinggi.
+   
+2. **Ridge Regression**  
+   Ridge menambahkan penalti L2 pada koefisien regresi untuk mengurangi multikolinearitas.
+
+3. **Lasso Regression**  
+   Lasso menambahkan penalti L1, yang dapat menghasilkan model lebih sederhana dengan menghilangkan beberapa fitur.
+
+4. **Random Forest**  
+   Ensemble method yang menggabungkan banyak decision tree untuk meningkatkan akurasi.
+
+5. **Decision Tree**  
+   Model ini membuat pohon keputusan berdasarkan aturan-aturan yang memisahkan data.
+
+6. **Support Vector Regression (SVR)**  
+   SVR menggunakan hyperplane untuk memprediksi nilai target dalam margin toleransi tertentu.
+
+7. **XGBoost**  
+   Algoritma boosting berbasis gradient yang sangat efisien untuk data tabular.
+
+### **2.2 Tuning Parameter**
+Hyperparameter terbaik diperoleh melalui GridSearchCV:
+```python
+from sklearn.model_selection import GridSearchCV
+
+params = {
+    'Linear Regression': {},
+    'Ridge': {'alpha': [0.1, 1, 10]},
+    'Lasso': {'alpha': [0.01, 0.1, 1]},
+    'Random Forest': {'n_estimators': [100, 200], 'max_depth': [10, 20, None]},
+    'Decision Tree': {'max_depth': [10, 20, None]},
+    'SVR': {'C': [1, 10], 'kernel': ['rbf']},
+    'XGBoost': {'learning_rate': [0.01, 0.1], 'n_estimators': [100, 200]}
+}
+
+best_models = {}
+for name, model in models.items():
+    grid = GridSearchCV(model, params[name], cv=3, scoring='r2', n_jobs=-1, verbose=1)
+    grid.fit(X_train, y_train)
+    best_models[name] = grid.best_estimator_
+```
+
+---
+
+## **3. Evaluation**
+
+Model dievaluasi menggunakan metrik:
+- **R²**: Mengukur seberapa baik model menjelaskan variansi target.
+- **MAPE**: Persentase rata-rata kesalahan prediksi.
+
+### **Hasil Evaluasi**
+```python
+from sklearn.metrics import r2_score, mean_absolute_percentage_error
+
+results = {}
+for name, model in best_models.items():
+    y_pred = model.predict(X_test)
+    r2 = r2_score(y_test, y_pred)
+    mape = mean_absolute_percentage_error(y_test, y_pred) * 100
+    results[name] = {'R²': r2, 'MAPE': mape}
+
+results_df = pd.DataFrame(results).T
+print(results_df)
+```
+
+### **Feature Importance**
+Untuk model Random Forest dan XGBoost:
+```python
+feature_importances = pd.Series(best_models['XGBoost'].feature_importances_, index=X.columns)
+feature_importances.nlargest(10).plot(kind='barh')
+plt.title("Feature Importances - XGBoost")
+plt.show()
+```
+
+---
+
+## **4. Kesimpulan**
+- **XGBoost** adalah model terbaik dengan nilai R² tertinggi (0.9692) dan MAPE terendah (4.39%).
+- **Random Forest** menjadi alternatif dengan performa hampir setara.
+- Model regresi linear tidak cocok untuk dataset ini karena nilai MAPE yang tinggi.
+
+**Rekomendasi**: 
+Gunakan XGBoost untuk prediksi harga rumah. Optimalkan proses preprocessing untuk meningkatkan akurasi lebih lanjut.

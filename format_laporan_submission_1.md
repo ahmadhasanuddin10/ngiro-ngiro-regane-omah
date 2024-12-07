@@ -135,35 +135,37 @@ Berbagai model diterapkan untuk memprediksi harga rumah. Berikut adalah deskrips
 
 ### **1. Linear Regression**
 Model regresi linear sederhana digunakan sebagai baseline.  
+Linear Regression adalah model regresi sederhana yang mengasumsikan hubungan linear antara variabel independen (fitur) dan variabel dependen (target). Model ini bekerja dengan mencari garis terbaik yang meminimalkan jumlah kuadrat dari selisih antara nilai prediksi dan nilai sebenarnya.
 - Tidak ada parameter khusus yang digunakan.  
 
 ### **2. Ridge Regression**
-Model regresi linear dengan regularisasi L2 untuk mencegah overfitting.  
+Ridge Regression adalah varian dari Linear Regression yang menambahkan penalti terhadap besarnya koefisien model untuk mengurangi overfitting. Penalti dihitung menggunakan **L2 regularization**, yaitu jumlah kuadrat dari nilai koefisien.
 - Parameter utama: `alpha` (kontrol tingkat regularisasi). Dicoba dengan nilai [0.1, 1, 10].  
 
 ### **3. Lasso Regression**
-Model regresi linear dengan regularisasi L1 yang dapat melakukan seleksi fitur.  
+Lasso Regression juga merupakan varian Linear Regression, tetapi menggunakan **L1 regularization**, yang menambahkan penalti terhadap nilai absolut dari koefisien. Model ini dapat menyetel beberapa koefisien menjadi nol, sehingga berguna untuk seleksi fitur.
+  
 - Parameter utama: `alpha`. Dicoba dengan nilai [0.01, 0.1, 1].  
 
 ### **4. Random Forest Regressor**
-Model berbasis ensemble yang menggunakan banyak pohon keputusan untuk meningkatkan akurasi.  
+Random Forest adalah model ensambel berbasis pohon keputusan yang menggabungkan prediksi dari banyak pohon untuk meningkatkan akurasi dan mengurangi overfitting. Model ini memecah data menjadi beberapa subset dan membangun pohon keputusan independen pada masing-masing subset.  
 - Parameter utama:  
   - `n_estimators`: Jumlah pohon (100, 200).  
   - `max_depth`: Kedalaman maksimum pohon (10, 20, None).  
 
 ### **5. Decision Tree Regressor**
-Model pohon keputusan tunggal.  
+Decision Tree bekerja dengan membagi data menjadi subset berdasarkan kondisi tertentu pada fitur, menghasilkan struktur pohon yang merepresentasikan aturan prediksi. Namun, model ini rentan terhadap overfitting pada data latih.  
 - Parameter utama:  
   - `max_depth`: Kedalaman maksimum pohon (10, 20, None).  
 
 ### **6. Support Vector Regressor (SVR)**
-Model regresi berbasis SVM dengan kernel RBF.  
+SVR adalah model berbasis margin yang mencoba menemukan hyperplane terbaik untuk memprediksi nilai target dengan meminimalkan error dalam margin tertentu. Kernel RBF (Radial Basis Function) sering digunakan untuk menangani data non-linear. 
 - Parameter utama:  
   - `C`: Regularisasi (1, 10).  
   - `kernel`: Jenis kernel (RBF).  
 
 ### **7. XGBoost Regressor**
-Model gradient boosting yang sangat efisien.  
+XGBoost (Extreme Gradient Boosting) adalah model boosting berbasis pohon yang sangat efisien dan mampu menangani data tidak seimbang dengan baik. Model ini bekerja dengan membangun pohon secara berurutan, di mana setiap pohon baru mencoba memperbaiki kesalahan pohon sebelumnya.
 - Parameter utama:  
   - `learning_rate`: Tingkat pembelajaran (0.01, 0.1).  
   - `n_estimators`: Jumlah pohon (100, 200).  
@@ -221,40 +223,4 @@ _Laporan ini telah disusun untuk memenuhi standar dokumentasi proyek machine lea
 
 ___Semoga Tugas Di terima dengan Baik, mohon bimbingannya__
 
-### **Tuning Parameter**
-Hyperparameter terbaik diperoleh melalui GridSearchCV:
-```python
-from sklearn.model_selection import GridSearchCV
 
-params = {
-    'Linear Regression': {},
-    'Ridge': {'alpha': [0.1, 1, 10]},
-    'Lasso': {'alpha': [0.01, 0.1, 1]},
-    'Random Forest': {'n_estimators': [100, 200], 'max_depth': [10, 20, None]},
-    'Decision Tree': {'max_depth': [10, 20, None]},
-    'SVR': {'C': [1, 10], 'kernel': ['rbf']},
-    'XGBoost': {'learning_rate': [0.01, 0.1], 'n_estimators': [100, 200]}
-}
-
-best_models = {}
-for name, model in models.items():
-    grid = GridSearchCV(model, params[name], cv=3, scoring='r2', n_jobs=-1, verbose=1)
-    grid.fit(X_train, y_train)
-    best_models[name] = grid.best_estimator_
-```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
--

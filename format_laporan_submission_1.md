@@ -139,7 +139,7 @@ df['price_per_sqft'] = df['price'] / df['area']
 ```
 
 ---
-#### **1. Mapping Kolom 'hotwaterheating'**
+#### **Mapping Kolom 'hotwaterheating'**
 Kolom `'hotwaterheating'` yang berisi nilai kategorikal (`'yes'` atau `'no'`) diubah menjadi nilai numerik menggunakan *dictionary mapping*:
 - `'yes'` → 1  
 - `'no'` → 0  

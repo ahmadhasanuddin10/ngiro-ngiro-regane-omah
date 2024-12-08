@@ -233,6 +233,15 @@ XGBoost (Extreme Gradient Boosting) adalah model boosting berbasis pohon yang sa
 
 ---
 
+### **Hasil Terbaik:**
+- **Model terbaik** berdasarkan nilai *R²* dan *MAPE* adalah **XGBoost Regressor**, dengan performa berikut:
+  - **R²**: 0.9692
+  - **MAPE**: 4.3856e+13  
+
+Model ini memiliki kombinasi parameter terbaik:
+- `learning_rate`: 0.1  
+- `n_estimators`: 200
+
 # **Evaluation**
 
 ### **Metode Evaluasi**
@@ -283,7 +292,6 @@ _Laporan ini telah disusun untuk memenuhi standar dokumentasi proyek machine lea
 
 
 ___Semoga Tugas Di terima dengan Baik, mohon bimbingannya__
-
 
 
 
